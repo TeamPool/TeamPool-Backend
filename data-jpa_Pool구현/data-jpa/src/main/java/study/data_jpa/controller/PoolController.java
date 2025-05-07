@@ -1,0 +1,36 @@
+package study.data_jpa.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import study.data_jpa.dto.*;
+import study.data_jpa.service.PoolService;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/pools")
+public class PoolController {
+
+    private final PoolService poolService;
+
+    // GET /api/pools/my?userId=1
+    @GetMapping("/my")
+    public ResponseEntity<List<MyPoolDto>> getMyPools(@RequestParam Long userId) {
+        return ResponseEntity.ok(poolService.getMyPools(userId));
+    }
+
+    // POST /api/pools
+    @PostMapping
+    public ResponseEntity<CreatePoolResponseDto> createPool(@RequestBody CreatePoolRequestDto dto) {
+        Long poolId = poolService.createPool(dto);
+        return ResponseEntity.ok(new CreatePoolResponseDto(poolId));
+    }
+
+    // GET /api/pools/{poolId}
+    @GetMapping("/{poolId}")
+    public ResponseEntity<PoolDetailDto> getPoolDetail(@PathVariable Long poolId) {
+        return ResponseEntity.ok(poolService.getPoolDetail(poolId));
+    }
+}
