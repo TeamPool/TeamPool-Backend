@@ -34,6 +34,5 @@ public class PoolSchedule {
         this.pool = pool;
         pool.getSchedules().add(this);
     }
-
 }
 

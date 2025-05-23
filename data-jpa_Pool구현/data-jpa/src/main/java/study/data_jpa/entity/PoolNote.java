@@ -14,7 +14,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 public class PoolNote {
 
-    @Id
+    @Id @GeneratedValue
     @Column(name = "poolnote_id")
     private Long id;
 
@@ -32,6 +32,5 @@ public class PoolNote {
         this.pool = pool;
         pool.getNotes().add(this);
     }
-
 }
 

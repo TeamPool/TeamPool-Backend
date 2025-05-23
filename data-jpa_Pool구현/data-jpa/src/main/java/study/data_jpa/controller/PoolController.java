@@ -33,4 +33,26 @@ public class PoolController {
     public ResponseEntity<PoolDetailDto> getPoolDetail(@PathVariable Long poolId) {
         return ResponseEntity.ok(poolService.getPoolDetail(poolId));
     }
+
+    @GetMapping("/{poolId}/timetables")
+    public ResponseEntity<List<UserTimetableResponseDto>> getPoolMemberTimetables(@PathVariable Long poolId) {
+        return ResponseEntity.ok(poolService.getPoolMembersTimetables(poolId));
+    }
+
+    @GetMapping("/friends")
+    public ResponseEntity<List<FriendSimpleDto>> getFriendList(@RequestParam Long userId) {
+        return ResponseEntity.ok(poolService.getFriendList(userId));
+    }
+
+    @PostMapping("/{poolId}/notes")
+    public ResponseEntity<Void> addPoolNote(@PathVariable Long poolId,
+                                            @RequestBody AddPoolNoteRequestDto dto) {
+        poolService.addPoolNote(poolId, dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{poolId}/notes")
+    public ResponseEntity<List<PoolDetailDto.PoolNoteDto>> getPoolNotes(@PathVariable Long poolId) {
+        return ResponseEntity.ok(poolService.getPoolNotes(poolId));
+    }
 }

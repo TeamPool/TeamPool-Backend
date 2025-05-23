@@ -24,4 +24,3 @@ public class ScheduleSummaryDto {
         this.place = place;
     }
 }
-
