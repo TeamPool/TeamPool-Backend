@@ -1,5 +1,6 @@
 package study.data_jpa.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +8,7 @@ import study.data_jpa.dto.*;
 import study.data_jpa.entity.*;
 import study.data_jpa.repository.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,6 +21,7 @@ public class PoolService {
     private final PoolRepository poolRepository;
     private final PoolMemberRepository poolMemberRepository;
     private final UserRepository userRepository;
+    private final PoolNoteRepository poolNoteRepository;
 
     public List<MyPoolDto> getMyPools(Long userId) {
         List<Pool> pools = poolRepository.findPoolsByUserId(userId);
@@ -78,5 +81,70 @@ public class PoolService {
 
         return detailDto;
     }
-}
 
+    public List<UserTimetableResponseDto> getPoolMembersTimetables(Long poolId) {
+        Pool pool = poolRepository.findById(poolId)
+                .orElseThrow(() -> new EntityNotFoundException("Pool not found"));
+
+        List<UserTimetableResponseDto> result = new ArrayList<>();
+
+        for (PoolMember member : pool.getMembers()) {
+            User user = member.getUser();
+
+            List<TimetableRequestDto> timetables = user.getTimetables().stream()
+                    .map(t -> {
+                        TimetableRequestDto dto = new TimetableRequestDto();
+                        dto.setSubject(t.getSubject());
+                        dto.setDayOfWeek(t.getDayOfWeek());
+                        dto.setStartTime(t.getStartTime());
+                        dto.setEndTime(t.getEndTime());
+                        dto.setPlace(t.getPlace());
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+
+            result.add(new UserTimetableResponseDto(user.getId(), user.getNickname(), timetables));
+        }
+
+        return result;
+    }
+
+    public List<FriendSimpleDto> getFriendList(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        return user.getFriends().stream()
+                .map(friend -> {
+                    User friendUser = friend.getFriendUser();
+                    return new FriendSimpleDto(
+                            friendUser.getId(),
+                            friendUser.getStudentNumber(),
+                            friendUser.getNickname()
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void addPoolNote(Long poolId, AddPoolNoteRequestDto dto) {
+        Pool pool = poolRepository.findById(poolId)
+                .orElseThrow(() -> new IllegalArgumentException("풀을 찾을 수 없습니다."));
+
+        PoolNote note = new PoolNote();
+        note.setTitle(dto.getTitle());
+        note.setSummary(dto.getSummary());
+        note.setTime(dto.getTime());
+        note.changePool(pool); // 연관관계 설정
+
+        poolNoteRepository.save(note);
+    }
+
+    public List<PoolDetailDto.PoolNoteDto> getPoolNotes(Long poolId) {
+        Pool pool = poolRepository.findById(poolId)
+                .orElseThrow(() -> new IllegalArgumentException("풀을 찾을 수 없습니다."));
+
+        return pool.getNotes().stream()
+                .map(n -> new PoolDetailDto.PoolNoteDto(n.getTitle(), n.getSummary(), n.getTime()))
+                .collect(Collectors.toList());
+    }
+}
