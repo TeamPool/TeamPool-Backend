@@ -25,6 +25,3 @@ public class GlobalExceptionHandler {
 
     // 필요한 경우 추가 예외 핸들러 확장 가능
 }
-
-
-
