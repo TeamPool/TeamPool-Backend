@@ -7,6 +7,7 @@ import study.data_jpa.dto.*;
 import study.data_jpa.service.PoolService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class PoolController {
         return ResponseEntity.ok(poolService.getMyPools(userId));
     }
 
-    // POST /api/pools
+    // POST /api/pool
     @PostMapping
     public ResponseEntity<CreatePoolResponseDto> createPool(@RequestBody CreatePoolRequestDto dto) {
         Long poolId = poolService.createPool(dto);
@@ -54,5 +55,11 @@ public class PoolController {
     @GetMapping("/{poolId}/notes")
     public ResponseEntity<List<PoolDetailDto.PoolNoteDto>> getPoolNotes(@PathVariable Long poolId) {
         return ResponseEntity.ok(poolService.getPoolNotes(poolId));
+    }
+
+    @GetMapping("/api/pools/{poolId}/available-times")
+    public ResponseEntity<AvailableTimesResponseDto> getAvailableTimes(@PathVariable Long poolId) {
+        Map<String, List<String>> result = poolService.getAvailableTimes(poolId);
+        return ResponseEntity.ok(new AvailableTimesResponseDto(result));
     }
 }

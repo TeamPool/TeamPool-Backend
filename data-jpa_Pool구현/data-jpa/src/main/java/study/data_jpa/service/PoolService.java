@@ -7,10 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 import study.data_jpa.dto.*;
 import study.data_jpa.entity.*;
 import study.data_jpa.repository.*;
+import study.data_jpa.util.TimeRange;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +23,7 @@ public class PoolService {
     private final PoolMemberRepository poolMemberRepository;
     private final UserRepository userRepository;
     private final PoolNoteRepository poolNoteRepository;
+    private final PersonalTimetableRepository personalTimetableRepository;
 
     public List<MyPoolDto> getMyPools(Long userId) {
         List<Pool> pools = poolRepository.findPoolsByUserId(userId);
@@ -147,4 +149,80 @@ public class PoolService {
                 .map(n -> new PoolDetailDto.PoolNoteDto(n.getTitle(), n.getSummary(), n.getTime()))
                 .collect(Collectors.toList());
     }
+
+    public Map<String, List<String>> getAvailableTimes(Long poolId) {
+        List<User> members = poolMemberRepository.findUsersByPoolId(poolId);
+
+        Map<DayOfWeek, List<TimeRange>> busyMap = new HashMap<>();
+
+        for (User user : members) {
+            List<PersonalTimetable> timetables = personalTimetableRepository.findByUserId(user.getId());
+            for (PersonalTimetable t : timetables) {
+                busyMap.computeIfAbsent(t.getDayOfWeek(), k -> new ArrayList<>())
+                        .add(new TimeRange(t.getStartTime(), t.getEndTime()));
+            }
+        }
+
+        Map<String, List<String>> availableMap = new LinkedHashMap<>();
+
+        for (DayOfWeek day : DayOfWeek.values()) {
+            List<TimeRange> busy = busyMap.getOrDefault(day, new ArrayList<>());
+            List<TimeRange> available = calculateAvailableRanges(busy);
+
+            if (available.isEmpty()) {
+                availableMap.put(day.name(), List.of("회의 가능한 시간이 없습니다"));
+            } else {
+                availableMap.put(day.name(), available.stream()
+                        .map(TimeRange::toString)
+                        .collect(Collectors.toList()));
+            }
+        }
+
+        return availableMap;
+    }
+
+    private List<TimeRange> calculateAvailableRanges(List<TimeRange> busyRanges) {
+        List<TimeRange> merged = mergeOverlapping(busyRanges);
+        List<TimeRange> available = new ArrayList<>();
+
+        LocalTime dayStart = LocalTime.of(0, 0);
+        LocalTime dayEnd = LocalTime.of(23, 59);
+
+        for (TimeRange busy : merged) {
+            if (dayStart.isBefore(busy.getStart())) {
+                available.add(new TimeRange(dayStart, busy.getStart()));
+            }
+            dayStart = busy.getEnd();
+        }
+
+        if (dayStart.isBefore(dayEnd)) {
+            available.add(new TimeRange(dayStart, dayEnd));
+        }
+
+        return available;
+    }
+
+    private List<TimeRange> mergeOverlapping(List<TimeRange> ranges) {
+        if (ranges.isEmpty()) return List.of();
+
+        List<TimeRange> sorted = new ArrayList<>(ranges);
+        sorted.sort(Comparator.naturalOrder());
+
+        List<TimeRange> merged = new ArrayList<>();
+        TimeRange prev = sorted.get(0);
+
+        for (int i = 1; i < sorted.size(); i++) {
+            TimeRange curr = sorted.get(i);
+            if (prev.overlaps(curr) || prev.isAdjacent(curr)) {
+                prev = prev.merge(curr);
+            } else {
+                merged.add(prev);
+                prev = curr;
+            }
+        }
+
+        merged.add(prev);
+        return merged;
+    }
+
 }
