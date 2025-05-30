@@ -32,6 +32,5 @@ public class PoolMember {
         this.pool = pool;
         pool.getMembers().add(this);
     }
-
 }
 

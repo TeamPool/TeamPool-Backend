@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import study.data_jpa.dto.AddScheduleRequestDto;
+import study.data_jpa.dto.ApiResponse;
 import study.data_jpa.dto.ScheduleSummaryDto;
 import study.data_jpa.service.ScheduleService;
 
@@ -20,21 +21,23 @@ public class ScheduleController {
 
     // GET /api/schedules?poolId=3
     @GetMapping
-    public ResponseEntity<List<ScheduleSummaryDto>> getAllSchedules(@RequestParam Long poolId) {
-        return ResponseEntity.ok(scheduleService.getAllSchedules(poolId));
+    public ResponseEntity<ApiResponse<List<ScheduleSummaryDto>>> getAllSchedules(@RequestParam Long poolId) {
+        List<ScheduleSummaryDto> result = scheduleService.getAllSchedules(poolId);
+        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "스터디 일정 전체 조회 성공", result));
     }
 
     // GET /api/schedules/by-day?date=2025-05-08
     @GetMapping("/by-day")
-    public ResponseEntity<List<ScheduleSummaryDto>> getSchedulesByDay(
+    public ResponseEntity<ApiResponse<List<ScheduleSummaryDto>>> getSchedulesByDay(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(scheduleService.getSchedulesByDay(date));
+        List<ScheduleSummaryDto> result = scheduleService.getSchedulesByDay(date);
+        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "특정 날짜 일정 조회 성공", result));
     }
 
     // POST /api/schedules
     @PostMapping
-    public ResponseEntity<Void> addSchedule(@RequestBody AddScheduleRequestDto dto) {
+    public ResponseEntity<ApiResponse<Void>> addSchedule(@RequestBody AddScheduleRequestDto dto) {
         scheduleService.addSchedule(dto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "일정 등록 성공", null));
     }
 }

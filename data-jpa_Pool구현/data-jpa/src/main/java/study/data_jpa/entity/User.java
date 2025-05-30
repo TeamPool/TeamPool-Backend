@@ -38,4 +38,3 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<PoolMember> poolMemberships = new ArrayList<>();
 }
-
