@@ -38,6 +38,17 @@ dependencies {
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
+	//spring security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	testImplementation 'org.springframework.security:spring-security-test'
+	//jwt
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	//이건 그냥 필수로 넣길래 넣어봄
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	//sql
+	implementation 'com.mysql:mysql-connector-j:8.3.0'
 }
 
 tasks.named('test') {
