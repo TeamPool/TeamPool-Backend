@@ -21,13 +21,20 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
+    @Column(name = "student_number", unique = true, nullable = false)
     private String studentNumber;
 
+    @Column(name = "nickname", nullable = false)
     private String nickname;
 
+    @Column(name = "password", nullable = false)
     private String password;
 
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "refresh_token")
+    private String refreshToken;
 
     @OneToMany(mappedBy = "user")
     private List<Friend> friends = new ArrayList<>();
