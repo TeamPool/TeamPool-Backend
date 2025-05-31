@@ -14,9 +14,10 @@ public class JwtTokenProvider {
     private final long accessTokenValidity = 60 * 60 * 1000L;           // 1시간
     private final long refreshTokenValidity = 30L * 24 * 60 * 60 * 1000; // 30일
 
-    // Access Token 생성
-    public String createToken(String username, String role) {
+    // Access Token 생성 (userId 포함)
+    public String createToken(Long userId, String username, String role) {
         Claims claims = Jwts.claims().setSubject(username);
+        claims.put("userId", userId);
         claims.put("role", role);
 
         Date now = new Date();
@@ -30,9 +31,10 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Refresh Token 생성
-    public String createRefreshToken(String username) {
+    // Refresh Token 생성 (userId 포함)
+    public String createRefreshToken(Long userId, String username) {
         Claims claims = Jwts.claims().setSubject(username);
+        claims.put("userId", userId);
 
         Date now = new Date();
         Date expiration = new Date(now.getTime() + refreshTokenValidity);
@@ -45,7 +47,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // 토큰에서 사용자 정보 추출
+    // 토큰에서 username 추출
     public String getUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
@@ -53,6 +55,16 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    // 토큰에서 userId 추출
+    public Long getUserId(String token) {
+        return ((Number) Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("userId")).longValue();
     }
 
     // 토큰 유효성 검증
