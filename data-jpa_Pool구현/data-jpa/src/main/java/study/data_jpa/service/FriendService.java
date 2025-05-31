@@ -6,6 +6,7 @@ import study.data_jpa.repository.*;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,11 +26,20 @@ public class FriendService {
         User friendUser = userRepository.findByStudentNumber(requestDto.getStudentNumber())
                 .orElseThrow(() -> new RuntimeException("친구로 추가할 유저가 없음"));
 
-        Friend friend = new Friend();
-        friend.changeUser(user);
-        friend.changeFriendUser(friendUser);
+        if (friendRepository.existsByUser_IdAndFriendUser_Id(user.getId(), friendUser.getId())) {
+            throw new RuntimeException("이미 친구입니다.");
+        }
 
-        friendRepository.save(friend);
+        Friend friend1 = new Friend();
+        friend1.changeUser(user);
+        friend1.changeFriendUser(friendUser);
+
+        Friend friend2 = new Friend();
+        friend2.changeUser(friendUser);
+        friend2.changeFriendUser(user);
+
+        friendRepository.save(friend1);
+        friendRepository.save(friend2);
     }
 
     // 친구 목록 조회
@@ -49,14 +59,18 @@ public class FriendService {
     }
 
     // 친구 삭제
+    @Transactional
     public void deleteFriend(Long userId, Long friendId) {
         Friend friend = friendRepository.findById(friendId)
                 .orElseThrow(() -> new RuntimeException("해당 친구 관계가 없음"));
 
-        if (!friend.getUser().getId().equals(userId)) {  // ✅ user 엔티티에서 ID 꺼내기
+        if (!friend.getUser().getId().equals(userId)) {
             throw new RuntimeException("삭제 권한이 없습니다.");
         }
+        User me = friend.getUser();
+        User target = friend.getFriendUser();
 
         friendRepository.delete(friend);
+        friendRepository.deleteByUserAndFriendUser(target, me);
     }
 }
