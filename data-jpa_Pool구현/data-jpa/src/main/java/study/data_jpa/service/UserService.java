@@ -58,8 +58,8 @@ public class UserService {
             throw new IllegalStateException("비밀번호가 일치하지 않습니다.");
         }
 
-        String accessToken = jwtTokenProvider.createToken(user.getStudentNumber(), "ROLE_USER");
-        String refreshToken = jwtTokenProvider.createRefreshToken(user.getStudentNumber());
+        String accessToken = jwtTokenProvider.createToken(user.getId(), user.getStudentNumber(), "ROLE_USER");
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getId(), user.getStudentNumber());
 
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
@@ -76,14 +76,15 @@ public class UserService {
         }
 
         String studentNumber = jwtTokenProvider.getUsername(refreshToken);
+        Long userId = jwtTokenProvider.getUserId(refreshToken); // userId도 추출
 
-        User user = userRepository.findByStudentNumber(studentNumber)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("사용자 정보를 찾을 수 없습니다."));
 
         if (!refreshToken.equals(user.getRefreshToken())) {
             throw new IllegalStateException("리프레시 토큰이 일치하지 않습니다.");
         }
 
-        return jwtTokenProvider.createToken(studentNumber, "ROLE_USER");
+        return jwtTokenProvider.createToken(user.getId(), studentNumber, "ROLE_USER");
     }
 }
