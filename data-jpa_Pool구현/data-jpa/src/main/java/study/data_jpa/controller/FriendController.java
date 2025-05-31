@@ -31,12 +31,12 @@ public class FriendController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FriendResponseDto>> getFriends(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<ApiResponse<List<FriendResponseDto>>> getFriends(@AuthenticationPrincipal UserDetails userDetails) {
         String studentNumber = userDetails.getUsername();
         User user = userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(() -> new RuntimeException("사용자 없음"));
         List<FriendResponseDto> friends = friendService.getFriends(user.getId());
-        return ResponseEntity.ok(friends);
+        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "친구 목록 조회 성공", friends));
     }
 
     @DeleteMapping("/{friendId}")
