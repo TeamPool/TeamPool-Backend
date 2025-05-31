@@ -38,7 +38,7 @@ public class FriendService {
 
         return friends.stream()
                 .map(friend -> {
-                    User friendUser = friend.getFriendUser(); // ✅ 엔티티에서 바로 가져오기
+                    User friendUser = friend.getFriendUser();
                     return new FriendResponseDto(
                             friend.getId(),
                             friendUser.getNickname(),
