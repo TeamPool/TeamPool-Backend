@@ -22,13 +22,20 @@ public class UserController {
         return ResponseEntity.ok(new ApiResponse<>("200", "회원가입 성공", result));
     }
 
-    @GetMapping("/signup-dup")
-    public ResponseEntity<ApiResponse<String>> checkDuplicate(
-            @RequestParam String studentNumber,
+    @GetMapping("/studentNumber-signup-dup")
+    public ResponseEntity<ApiResponse<String>> checkStudentNumberDuplicate(
+            @RequestParam String studentNumber
+    ) {
+        userService.checkStudentNumberDuplicate(studentNumber);
+        return ResponseEntity.ok(new ApiResponse<>("200", "사용 가능한 학번입니다.", null));
+    }
+
+    @GetMapping("/nickname-signup-dup")
+    public ResponseEntity<ApiResponse<String>> checkNicknameDuplicate(
             @RequestParam String nickname
     ) {
-        userService.checkDuplicate(studentNumber, nickname); // 중복 시 예외 던짐
-        return ResponseEntity.ok(new ApiResponse<>("200", "사용 가능합니다.", null));
+        userService.checkNicknameDuplicate(nickname);
+        return ResponseEntity.ok(new ApiResponse<>("200", "사용 가능한 닉네임입니다.", null));
     }
 
     @PostMapping("/login")
