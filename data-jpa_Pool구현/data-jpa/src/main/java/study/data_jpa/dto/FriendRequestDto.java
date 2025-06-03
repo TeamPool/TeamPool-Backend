@@ -12,3 +12,4 @@ import lombok.Setter;
 public class FriendRequestDto {
     private String studentNumber; // 친구로 추가할 사용자의 학번
 }
+//test
