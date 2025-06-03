@@ -15,5 +15,5 @@ public class CreatePoolRequestDto {
     private String subject;
     private String poolSubject;
     private LocalDate deadline;
-    private List<Long> memberIds; // 함께 등록할 user ID 목록
+    private List<String> memberStudentNumbers; // userId → studentNumber로 변경
 }
