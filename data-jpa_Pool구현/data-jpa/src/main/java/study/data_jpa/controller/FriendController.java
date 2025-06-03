@@ -48,4 +48,14 @@ public class FriendController {
         friendService.deleteFriend(user.getId(), friendId);
         return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "친구 삭제 성공", null));
     }
+
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<UserSearchResponseDto>> searchUser(@RequestBody UserSearchRequestDto requestDto) {
+        User user = userRepository.findByStudentNumber(requestDto.getStudentNumber())
+                .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다."));
+
+        UserSearchResponseDto responseDto = new UserSearchResponseDto(user.getStudentNumber(), user.getNickname());
+        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "유저 검색 성공", responseDto));
+    }
+
 }
