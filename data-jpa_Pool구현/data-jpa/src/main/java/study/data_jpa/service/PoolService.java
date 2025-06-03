@@ -10,6 +10,7 @@ import study.data_jpa.repository.*;
 import study.data_jpa.util.TimeRange;
 
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,26 +34,42 @@ public class PoolService {
     }
 
     @Transactional
-    public Long createPool(CreatePoolRequestDto dto) {
+    public Long createPool(String ownerStudentNumber, CreatePoolRequestDto dto) {
+        // 1. Pool 객체 생성 및 저장
         Pool pool = new Pool();
         pool.setName(dto.getName());
         pool.setSubject(dto.getSubject());
         pool.setPoolSubject(dto.getPoolSubject());
         pool.setDeadline(dto.getDeadline());
-        pool.setCreatedAt(java.time.LocalDateTime.now());
+        pool.setCreatedAt(LocalDateTime.now());
 
         poolRepository.save(pool);
 
-        List<User> users = userRepository.findAllById(dto.getMemberIds());
-        for (User user : users) {
-            PoolMember member = new PoolMember();
-            member.changeUser(user);
-            member.changePool(pool);
-            poolMemberRepository.save(member);
+        // 2. 생성자 (owner) 등록
+        User owner = userRepository.findByStudentNumber(ownerStudentNumber)
+                .orElseThrow(() -> new RuntimeException("사용자 없음"));
+
+        PoolMember ownerMember = new PoolMember();
+        ownerMember.changeUser(owner);
+        ownerMember.changePool(pool);
+        poolMemberRepository.save(ownerMember);
+
+        // 3. 나머지 멤버들 학번 기준으로 조회 및 등록
+        List<String> memberNumbers = dto.getMemberStudentNumbers();
+        for (String number : memberNumbers) {
+            if (!number.equals(ownerStudentNumber)) { // 중복 등록 방지
+                User member = userRepository.findByStudentNumber(number)
+                        .orElseThrow(() -> new RuntimeException("학번 '" + number + "'에 해당하는 사용자를 찾을 수 없습니다."));
+                PoolMember memberEntry = new PoolMember();
+                memberEntry.changeUser(member);
+                memberEntry.changePool(pool);
+                poolMemberRepository.save(memberEntry);
+            }
         }
 
         return pool.getId();
     }
+
 
     public PoolDetailDto getPoolDetail(Long poolId) {
         Pool pool = poolRepository.findDetailedPoolById(poolId)

@@ -19,6 +19,7 @@ public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
+    // ✅ 특정 스터디의 전체 일정 조회
     // GET /api/schedules?poolId=3
     @GetMapping
     public ResponseEntity<ApiResponse<List<ScheduleSummaryDto>>> getAllSchedules(@RequestParam Long poolId) {
@@ -26,6 +27,7 @@ public class ScheduleController {
         return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "스터디 일정 전체 조회 성공", result));
     }
 
+    // ✅ 특정 날짜의 전체 일정 조회 (스터디 구분 없음)
     // GET /api/schedules/by-day?date=2025-05-08
     @GetMapping("/by-day")
     public ResponseEntity<ApiResponse<List<ScheduleSummaryDto>>> getSchedulesByDay(
@@ -34,6 +36,7 @@ public class ScheduleController {
         return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "특정 날짜 일정 조회 성공", result));
     }
 
+    // ✅ 일정 등록 (Pool 기준)
     // POST /api/schedules
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> addSchedule(@RequestBody AddScheduleRequestDto dto) {
