@@ -24,6 +24,14 @@ public class MypageController {
         return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "닉네임 변경 완료", null));
     }
 
+    // 닉네임 조회
+    @GetMapping("/nickname")
+    public ResponseEntity<ApiResponse<String>> getNickname(@AuthenticationPrincipal UserDetails userDetails) {
+        String studentNumber = userDetails.getUsername();
+        String nickname = MypageService.getNickname(studentNumber);
+        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "닉네임 조회 성공", nickname));
+    }
+
     // 계정 삭제
     @DeleteMapping("/me")
     public ResponseEntity<ApiResponse<Object>> deleteAccount(@AuthenticationPrincipal UserDetails userDetails) {

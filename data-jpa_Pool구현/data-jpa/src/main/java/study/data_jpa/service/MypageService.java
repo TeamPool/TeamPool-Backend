@@ -21,6 +21,12 @@ public class MypageService {
         userRepository.save(user);
     }
 
+    public String getNickname(String studentNumber) {
+        User user = userRepository.findByStudentNumber(studentNumber)
+                .orElseThrow(() -> new RuntimeException("사용자 없음"));
+        return user.getNickname();
+    }
+
     public void deleteUserByStudentNumber(String studentNumber) {
         User user = userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(() -> new RuntimeException("사용자 없음"));
