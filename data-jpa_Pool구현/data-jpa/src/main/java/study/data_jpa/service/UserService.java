@@ -43,10 +43,15 @@ public class UserService {
         }
     }
 
-    public void checkDuplicate(String studentNumber, String nickname) {
-        if (userRepository.existsByStudentNumber(studentNumber) ||
-                userRepository.existsByNickname(nickname)) {
-            throw new IllegalStateException("이미 사용 중입니다.");
+    public void checkStudentNumberDuplicate(String studentNumber) {
+        if (userRepository.existsByStudentNumber(studentNumber)) {
+            throw new IllegalStateException("이미 사용 중인 학번입니다.");
+        }
+    }
+
+    public void checkNicknameDuplicate(String nickname) {
+        if (userRepository.existsByNickname(nickname)) {
+            throw new IllegalStateException("이미 사용 중인 닉네임입니다.");
         }
     }
 
@@ -76,7 +81,7 @@ public class UserService {
         }
 
         String studentNumber = jwtTokenProvider.getUsername(refreshToken);
-        Long userId = jwtTokenProvider.getUserId(refreshToken); // userId도 추출
+        Long userId = jwtTokenProvider.getUserId(refreshToken);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("사용자 정보를 찾을 수 없습니다."));
