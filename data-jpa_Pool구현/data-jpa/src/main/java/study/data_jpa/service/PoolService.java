@@ -28,10 +28,26 @@ public class PoolService {
 
     public List<MyPoolDto> getMyPools(Long userId) {
         List<Pool> pools = poolRepository.findPoolsByUserId(userId);
+
         return pools.stream()
-                .map(p -> new MyPoolDto(p.getId(), p.getName(), p.getSubject(), p.getDeadline()))
+                .map(pool -> {
+                    List<String> memberNicknames = pool.getMembers().stream()
+                            .map(pm -> pm.getUser().getNickname())
+                            .collect(Collectors.toList());
+
+                    return new MyPoolDto(
+                            pool.getId(),
+                            pool.getName(),
+                            pool.getSubject(),
+                            pool.getPoolSubject(),
+                            pool.getDeadline(),
+                            pool.getCreatedAt(),
+                            memberNicknames
+                    );
+                })
                 .collect(Collectors.toList());
     }
+
 
     @Transactional
     public Long createPool(String ownerStudentNumber, CreatePoolRequestDto dto) {
