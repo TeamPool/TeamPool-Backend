@@ -34,4 +34,16 @@ public class TimetableController {
         return ResponseEntity.status(201)
                 .body(new ApiResponse<>("SUCCESS", "개인 시간표 등록 성공", null));
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<List<TimetableRequestDto>>> getMyTimetables(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String studentNumber = userDetails.getUsername();
+        User user = userRepository.findByStudentNumber(studentNumber)
+                .orElseThrow(() -> new RuntimeException("사용자 없음"));
+
+        List<TimetableRequestDto> result = timetableService.getTimetablesByUserId(user.getId());
+        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "개인 시간표 조회 성공", result));
+    }
+
 }

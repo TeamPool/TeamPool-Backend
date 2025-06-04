@@ -52,4 +52,19 @@ public class TimetableService {
             timetableRepository.save(timetable);
         }
     }
+
+    @Transactional(readOnly = true)
+    public List<TimetableRequestDto> getTimetablesByUserId(Long userId) {
+        List<PersonalTimetable> timetables = timetableRepository.findByUserId(userId);
+
+        return timetables.stream().map(t -> {
+            TimetableRequestDto dto = new TimetableRequestDto();
+            dto.setDayOfWeek(t.getDayOfWeek());
+            dto.setSubject(t.getSubject());
+            dto.setStartTime(t.getStartTime());
+            dto.setEndTime(t.getEndTime());
+            dto.setPlace(t.getPlace());
+            return dto;
+        }).toList();
+    }
 }

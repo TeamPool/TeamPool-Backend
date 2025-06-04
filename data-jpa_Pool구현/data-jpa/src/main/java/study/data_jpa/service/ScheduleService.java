@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import study.data_jpa.dto.AddScheduleRequestDto;
+import study.data_jpa.dto.PoolScheduleGroupDto;
 import study.data_jpa.dto.ScheduleSummaryDto;
 import study.data_jpa.entity.Pool;
 import study.data_jpa.entity.PoolSchedule;
+import study.data_jpa.repository.PoolMemberRepository;
 import study.data_jpa.repository.PoolRepository;
 import study.data_jpa.repository.PoolScheduleRepository;
 
@@ -21,6 +23,8 @@ public class ScheduleService {
 
     private final PoolScheduleRepository scheduleRepository;
     private final PoolRepository poolRepository;
+    private final PoolMemberRepository poolMemberRepository;
+
 
     public List<ScheduleSummaryDto> getAllSchedules(Long poolId) {
         return scheduleRepository.findByPool_Id(poolId)
@@ -59,5 +63,24 @@ public class ScheduleService {
         schedule.changePool(pool);
 
         scheduleRepository.save(schedule);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PoolScheduleGroupDto> getMyAllSchedules(Long userId) {
+        List<Pool> myPools = poolMemberRepository.findPoolsByUserId(userId);
+
+        return myPools.stream().map(pool -> {
+            List<ScheduleSummaryDto> schedules = scheduleRepository.findByPool_Id(pool.getId())
+                    .stream()
+                    .map(s -> new ScheduleSummaryDto(
+                            s.getId(),
+                            s.getTitle(),
+                            s.getStartDatetime(),
+                            s.getEndDatetime(),
+                            s.getPlace()))
+                    .collect(Collectors.toList());
+
+            return new PoolScheduleGroupDto(pool.getId(), pool.getName(), schedules);
+        }).collect(Collectors.toList());
     }
 }

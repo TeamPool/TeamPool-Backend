@@ -40,13 +40,6 @@ public class PoolController {
         return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "스터디 그룹 생성 성공", new CreatePoolResponseDto(poolId)));
     }
 
-    // ✅ 스터디 그룹 상세 조회
-    @GetMapping("/{poolId}")
-    public ResponseEntity<ApiResponse<PoolDetailDto>> getPoolDetail(@PathVariable Long poolId) {
-        PoolDetailDto detail = poolService.getPoolDetail(poolId);
-        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "스터디 그룹 상세 조회 성공", detail));
-    }
-
     // ✅ 스터디 그룹 구성원 시간표 조회
     @GetMapping("/{poolId}/timetables")
     public ResponseEntity<ApiResponse<List<UserTimetableResponseDto>>> getPoolMemberTimetables(@PathVariable Long poolId) {
